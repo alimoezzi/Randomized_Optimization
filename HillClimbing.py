@@ -1,8 +1,6 @@
 import math
 from random import uniform
 
-from sqlalchemy.sql.functions import random
-
 f = lambda x: ((math.sin(10 * math.pi * x) / 2 * x) + (x - 1) ** 4) if 0.5 < x < 2.5 else 0
 
 

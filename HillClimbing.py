@@ -16,7 +16,7 @@ def Hill_Climbing(f, fn, g: float) -> float:
             if a[0] > a[1]:
                 current = near[0]
             else:
-                current = near[0]
+                current = near[1]
         else:
             return current
 

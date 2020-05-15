@@ -1,11 +1,16 @@
 from functools import reduce
 from random import sample, shuffle, randrange, choices
+import altair as alt
+import numpy as np
+import pandas as pd
+from altair import Chart
 
 fs = lambda x: 1 / (1 + (36 - x) ** 2)
 fm = lambda x: 1 / (1 + (360 - x) ** 2)
 
 
-def GA(k, fs, fm):
+def GA(k, fs, fm, mark=False):
+    market = {'x': [], 'y': []}
     p = []
     for i in range(k):
         acards = list(range(1, 11))
@@ -31,11 +36,32 @@ def GA(k, fs, fm):
         ))
         # mutate the best
         p.sort(key=lambda x: 1 / (1 + (2 - (x[0] + x[1])) ** 2), reverse=True)
-    return p[0]
+        if mark:
+            market['x'].append(p[0][0] + p[0][1])
+            market['y'].append(1 / (1 + (2 - (p[0][0] + p[0][1])) ** 2))
+    return p[0], market
+
 
 if __name__ == '__main__':
     import time
+
+    alt.renderers.enable('altair_viewer')
+    x = np.linspace(-3, 6)
+    source = pd.DataFrame({
+        'x': x,
+        'f(x)': 1 / (1 + (2 - (x)) ** 2)
+    })
+    chart: Chart = alt.Chart(source).mark_line().encode(
+        x='x',
+        y='f(x)'
+    ).interactive()
     a = time.time()
-    s = GA(10, fs, fm)
+    s, m = GA(10, fs, fm, mark=True)
     b = time.time()
-    print(s,sum(s[2]), reduce(lambda x, y: x * y, s[3], 1), b-a)
+    chart2 = alt.Chart(pd.DataFrame(m)).mark_point(filled=True, size=50).encode(
+        x='x',
+        y='y',
+        color=alt.value('red')
+    )
+    print(s, sum(s[2]), reduce(lambda x, y: x * y, s[3], 1), b - a)
+    (chart + chart2).show()
